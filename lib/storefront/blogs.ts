@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
+import { cache } from "react";
 
 export type BlogPost = {
   _id: ObjectId | string;
@@ -28,12 +29,39 @@ export async function getBlogPosts({ page = 1, limit = 9 }: { page?: number; lim
   return { posts: posts as BlogPost[], total, page, totalPages: Math.ceil(total / limit) };
 }
 
-export async function getBlogPost(slug: string) {
+// cache() de-duplicates the query when generateMetadata and the page both call it
+export const getBlogPost = cache(async (slug: string) => {
   const db = await connectDB();
-  return await db.collection("blogs").findOne({ slug, status: "published" }) as BlogPost | null;
-}
+  return (await db.collection("blogs").findOne({ slug, status: "published" })) as BlogPost | null;
+});
 
 export async function getBlogSlugs() {
   const db = await connectDB();
   return await db.collection("blogs").find({ status: "published" }).project({ slug: 1 }).toArray();
+}
+
+export async function getLatestPosts(limit = 3, excludeSlug?: string) {
+  const db = await connectDB();
+  const filter: Record<string, unknown> = { status: "published" };
+  if (excludeSlug) filter.slug = { $ne: excludeSlug };
+  const posts = await db
+    .collection("blogs")
+    .find(filter)
+    .sort({ publishedAt: -1, createdAt: -1 })
+    .limit(limit)
+    .toArray();
+  return posts as BlogPost[];
+}
+
+export function readingTime(html: string) {
+  const words = (html || "").replace(/<[^>]*>/g, " ").split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 220));
+}
+
+export function formatPostDate(date: Date | string, long = false) {
+  return new Intl.DateTimeFormat(undefined, {
+    year: "numeric",
+    month: long ? "long" : "short",
+    day: "numeric",
+  }).format(new Date(date));
 }

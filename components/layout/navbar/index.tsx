@@ -72,7 +72,21 @@ function CategoryBar({ categories, dark }: { categories: Collection[]; dark: boo
           className="scrollbar-hide flex items-center gap-0 overflow-x-auto px-3 lg:px-6"
           style={{ scrollBehavior: "smooth" }}
         >
-          {/* All Products first */}
+          <Link
+            href="/blog"
+            className={clsx(
+              "flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-xs font-semibold transition-colors",
+              pathname?.startsWith("/blog")
+                ? "border-red-600 text-red-600"
+                : dark
+                  ? "border-transparent text-neutral-400 hover:border-neutral-600 hover:text-neutral-200"
+                  : "border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-800"
+            )}
+          >
+            Blog
+          </Link>
+
+          {/* Shop */}
           <Link
             href="/shop"
             className={clsx(
@@ -84,7 +98,7 @@ function CategoryBar({ categories, dark }: { categories: Collection[]; dark: boo
                   : "border-transparent text-neutral-500 hover:border-neutral-300 hover:text-neutral-800"
             )}
           >
-            All Products
+            Shop
           </Link>
 
           {categories.map((cat) => {

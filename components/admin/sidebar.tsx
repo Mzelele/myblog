@@ -40,12 +40,12 @@ function StoreIcon({ className }: { className?: string }) {
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/blogs", label: "Blogs", icon: Newspaper },
+  { href: "/admin/pages", label: "Pages", icon: FileText },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/products/import-export", label: "Import / Export", icon: ArrowUpDown },
   { href: "/admin/categories", label: "Categories", icon: FolderTree },
   { href: "/admin/brands", label: "Brands", icon: Tag },
-  { href: "/admin/pages", label: "Pages", icon: FileText },
-  { href: "/admin/blogs", label: "Blogs", icon: Newspaper },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },

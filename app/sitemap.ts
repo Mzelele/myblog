@@ -36,8 +36,8 @@ export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: Route[] = [
     { url: `${baseUrl}/`, lastModified: new Date().toISOString(), priority: 1.0, changeFrequency: "daily" },
-    { url: `${baseUrl}/shop`, lastModified: new Date().toISOString(), priority: 0.9, changeFrequency: "daily" },
-    { url: `${baseUrl}/blog`, lastModified: new Date().toISOString(), priority: 0.5, changeFrequency: "weekly" },
+    { url: `${baseUrl}/shop`, lastModified: new Date().toISOString(), priority: 0.7, changeFrequency: "daily" },
+    { url: `${baseUrl}/blog`, lastModified: new Date().toISOString(), priority: 0.9, changeFrequency: "daily" },
   ];
 
   const fetchedRoutes: Route[] = [];
@@ -132,7 +132,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           fetchedRoutes.push({
             url: `${baseUrl}/blog/${slug}`,
             lastModified: toISO(doc.updatedAt ?? doc.publishedAt),
-            priority: 0.5,
+            priority: 0.8,
             changeFrequency: "monthly",
           });
         }
