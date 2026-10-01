@@ -34,6 +34,8 @@ export default async function EditBlogPage({ params }: { params: Promise<{ id: s
           featuredImage: blog.featuredImage || "",
           status: blog.status || "draft",
           author: blog.author || "",
+          category: blog.category || "",
+          tags: Array.isArray(blog.tags) ? blog.tags : [],
           metaTitle: blog.metaTitle || "",
           metaDescription: blog.metaDescription || "",
           publishedAt: blog.publishedAt?.toISOString?.() || blog.publishedAt || "",

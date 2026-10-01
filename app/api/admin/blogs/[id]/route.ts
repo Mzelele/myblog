@@ -1,3 +1,4 @@
+import { getCategory, normalizeTags } from "@/lib/blog-categories";
 import { connectDB } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server";
@@ -29,6 +30,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const body = await req.json();
     if (body.slug || body.title) body.slug = slugify(body.slug || body.title);
     if (body.publishedAt) body.publishedAt = new Date(body.publishedAt);
+    if ("category" in body) body.category = getCategory(body.category) ? body.category : "";
+    if ("tags" in body) body.tags = normalizeTags(body.tags);
     if (body.status === "published" && !body.publishedAt) body.publishedAt = new Date();
     if (body.slug) {
       const existing = await db.collection("blogs").findOne({ slug: body.slug, _id: { $ne: new ObjectId(id) } });

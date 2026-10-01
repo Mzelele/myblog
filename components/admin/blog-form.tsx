@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { BLOG_CATEGORIES } from "@/lib/blog-categories";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -21,6 +22,8 @@ type BlogFormProps = {
     featuredImage: string;
     status: string;
     author: string;
+    category?: string;
+    tags?: string[];
     metaTitle: string;
     metaDescription: string;
     publishedAt?: string;
@@ -48,6 +51,8 @@ export default function BlogForm({ initialData }: BlogFormProps) {
     featuredImage: initialData?.featuredImage || "",
     status: initialData?.status || "draft",
     author: initialData?.author || "",
+    category: initialData?.category || "",
+    tagsInput: (initialData?.tags || []).join(", "),
     metaTitle: initialData?.metaTitle || "",
     metaDescription: initialData?.metaDescription || "",
     publishedAt: initialData?.publishedAt ? initialData.publishedAt.slice(0, 10) : "",
@@ -69,10 +74,12 @@ export default function BlogForm({ initialData }: BlogFormProps) {
     setSaving(true);
     const url = isEditing ? `/api/admin/blogs/${initialData!._id}` : "/api/admin/blogs";
     const method = isEditing ? "PUT" : "POST";
+    const { tagsInput, ...rest } = form;
+    const payload = { ...rest, tags: tagsInput.split(",").map((t) => t.trim()).filter(Boolean) };
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify(payload),
     });
     if (res.ok) {
       toast.success(isEditing ? "Blog updated" : "Blog created");
@@ -113,6 +120,24 @@ export default function BlogForm({ initialData }: BlogFormProps) {
         <div className="space-y-2">
           <Label htmlFor="author">Author</Label>
           <Input id="author" value={form.author} onChange={(e) => setForm((p) => ({ ...p, author: e.target.value }))} placeholder="Author name" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="category">Category</Label>
+          <select
+            id="category"
+            value={form.category}
+            onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+            className="h-10 w-full rounded-md border border-neutral-200 bg-white px-3 text-sm dark:border-neutral-700 dark:bg-neutral-900"
+          >
+            <option value="">No category</option>
+            {BLOG_CATEGORIES.map((c) => (
+              <option key={c.slug} value={c.slug}>{c.name}</option>
+            ))}
+          </select>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="tags">Tags</Label>
+          <Input id="tags" value={form.tagsInput} onChange={(e) => setForm((p) => ({ ...p, tagsInput: e.target.value }))} placeholder="pcos, sleep, magnesium (comma-separated)" />
         </div>
         <div className="space-y-2">
           <Label>Status</Label>

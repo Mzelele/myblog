@@ -1,3 +1,4 @@
+import { getCategory, normalizeTags } from "@/lib/blog-categories";
 import { connectDB } from "@/lib/mongodb";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -36,6 +37,8 @@ export async function POST(req: NextRequest) {
       featuredImage: body.featuredImage || "",
       status: body.status || "draft",
       author: body.author || "",
+      category: getCategory(body.category) ? body.category : "",
+      tags: normalizeTags(body.tags),
       metaTitle: body.metaTitle || "",
       metaDescription: body.metaDescription || "",
       publishedAt: body.status === "published" ? new Date(body.publishedAt || now) : body.publishedAt ? new Date(body.publishedAt) : null,

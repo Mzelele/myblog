@@ -11,6 +11,8 @@ export type BlogPost = {
   featuredImage: string;
   status: string;
   author: string;
+  category?: string;
+  tags?: string[];
   metaTitle: string;
   metaDescription: string;
   publishedAt?: Date | string;
@@ -18,10 +20,22 @@ export type BlogPost = {
   updatedAt: Date | string;
 };
 
-export async function getBlogPosts({ page = 1, limit = 9 }: { page?: number; limit?: number }) {
+export async function getBlogPosts({
+  page = 1,
+  limit = 9,
+  category,
+  tag,
+}: {
+  page?: number;
+  limit?: number;
+  category?: string;
+  tag?: string;
+}) {
   const db = await connectDB();
   const skip = (page - 1) * limit;
-  const filter = { status: "published" };
+  const filter: Record<string, unknown> = { status: "published", deletedAt: { $exists: false } };
+  if (category) filter.category = category;
+  if (tag) filter.tags = tag;
   const [posts, total] = await Promise.all([
     db.collection("blogs").find(filter).sort({ publishedAt: -1, createdAt: -1 }).skip(skip).limit(limit).toArray(),
     db.collection("blogs").countDocuments(filter),
@@ -32,17 +46,17 @@ export async function getBlogPosts({ page = 1, limit = 9 }: { page?: number; lim
 // cache() de-duplicates the query when generateMetadata and the page both call it
 export const getBlogPost = cache(async (slug: string) => {
   const db = await connectDB();
-  return (await db.collection("blogs").findOne({ slug, status: "published" })) as BlogPost | null;
+  return (await db.collection("blogs").findOne({ slug, status: "published", deletedAt: { $exists: false } })) as BlogPost | null;
 });
 
 export async function getBlogSlugs() {
   const db = await connectDB();
-  return await db.collection("blogs").find({ status: "published" }).project({ slug: 1 }).toArray();
+  return await db.collection("blogs").find({ status: "published", deletedAt: { $exists: false } }).project({ slug: 1 }).toArray();
 }
 
 export async function getLatestPosts(limit = 3, excludeSlug?: string) {
   const db = await connectDB();
-  const filter: Record<string, unknown> = { status: "published" };
+  const filter: Record<string, unknown> = { status: "published", deletedAt: { $exists: false } };
   if (excludeSlug) filter.slug = { $ne: excludeSlug };
   const posts = await db
     .collection("blogs")

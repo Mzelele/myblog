@@ -1,4 +1,5 @@
 import { connectDB } from "@/lib/mongodb";
+import { BLOG_CATEGORIES } from "@/lib/blog-categories";
 import { baseUrl } from "lib/utils";
 import { MetadataRoute } from "next";
 
@@ -40,7 +41,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/blog`, lastModified: new Date().toISOString(), priority: 0.9, changeFrequency: "daily" },
   ];
 
-  const fetchedRoutes: Route[] = [];
+  const fetchedRoutes: Route[] = BLOG_CATEGORIES.map((c) => ({
+    url: `${baseUrl}/blog/category/${c.slug}`,
+    lastModified: new Date().toISOString(),
+    priority: 0.8,
+    changeFrequency: "weekly" as const,
+  }));
 
   try {
     const db = await connectDB();
@@ -123,7 +129,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Blog posts
     try {
       const posts = await db.collection("blogs")
-        .find({ status: "published" })
+        .find({ status: "published", deletedAt: { $exists: false } })
         .project({ slug: 1, updatedAt: 1, publishedAt: 1 })
         .toArray();
       for (const doc of posts) {

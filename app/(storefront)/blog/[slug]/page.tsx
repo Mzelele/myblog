@@ -1,6 +1,7 @@
 import PostCard from "@/components/blog/post-card";
 import Prose from "@/components/prose";
 import { formatPostDate, getBlogPost, getLatestPosts, readingTime } from "@/lib/storefront/blogs";
+import { getCategory } from "@/lib/blog-categories";
 import { baseUrl } from "@/lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -47,6 +48,8 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
     "@context": "https://schema.org",
     "@type": "Article",
     headline: post.title,
+    articleSection: getCategory(post.category)?.name,
+    keywords: post.tags?.join(", "),
     description: post.metaDescription || post.excerpt,
     image: post.featuredImage ? [post.featuredImage] : undefined,
     datePublished: new Date(published).toISOString(),
@@ -63,6 +66,14 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
       />
       <article className="mx-auto max-w-4xl px-4 py-10">
         <div className="mb-8 text-center">
+          {getCategory(post.category) ? (
+            <Link
+              href={`/blog/category/${post.category}`}
+              className="mb-3 inline-block rounded-full bg-neutral-900 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white"
+            >
+              {getCategory(post.category)?.name}
+            </Link>
+          ) : null}
           <p className="text-sm uppercase tracking-wide text-neutral-500">
             {formatPostDate(published, true)} · {readingTime(post.content)} min read
             {post.author ? ` · By ${post.author}` : ""}
@@ -76,6 +87,20 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
           </div>
         ) : null}
         <Prose className="max-w-none" html={post.content} />
+
+        {post.tags && post.tags.length > 0 ? (
+          <div className="mt-8 flex flex-wrap gap-2">
+            {post.tags.map((t) => (
+              <Link
+                key={t}
+                href={`/blog?tag=${encodeURIComponent(t)}`}
+                className="rounded-full border border-neutral-200 px-3 py-1 text-xs text-neutral-600 hover:border-neutral-400"
+              >
+                #{t}
+              </Link>
+            ))}
+          </div>
+        ) : null}
 
         <div className="mt-12 rounded-2xl border border-neutral-200 bg-white p-6 text-center">
           <p className="text-lg font-semibold text-neutral-900">Like what you read?</p>
